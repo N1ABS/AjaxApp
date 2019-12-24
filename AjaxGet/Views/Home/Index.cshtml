@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="row">
+    <h4>Exercise 1</h4>
+    <div class="col-md-6">
+        <form id="frm-info">
+            <div class="form-group">
+                <label for="txt-firstname">First Name</label>
+                <input type="text" name="FirstName" class="form-control" id="txt-firstname">
+            </div>
+            <div class="form-group">
+                <label for="txt-lastname">Last Name</label>
+                <input type="text" name="LastName" class="form-control" id="txt-lastname">
+            </div>
+            <input type="button" id="btn-submit" class="btn btn-primary" value="Submit" /><br />
+        </form>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <h4>Exercise 2</h4>
+    <div class="col-md-6">
+        <div class="row">
+            <a id="btn-randomnumber" style="cursor:pointer;margin-top:10px;" class="btn btn-warning col-md-3">Generate</a>
+            <div id="rnd-text" class="col-md-8 col-md-offset-1 alert alert-success" role="alert" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <h4>Exercise 3</h4>
+    <div class="col-md-6">
+        <form id="frm-student">
+            <div class="form-group">
+                <label for="txt-name">Name</label>
+                <input type="text" name="Name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="txt-mark">Mark</label>
+                <input type="text" name="Mark" class="form-control">
+            </div>
+            <input type="button" id="btn-student" class="btn btn-primary" value="Submit" /><br />
+        </form>
+        <div id="studentsDiv"></div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+
+        $("#btn-submit").on("click", function () {
+            console.log("button was clicked!");
+
+            var firstName = $("#txt-firstname").val();
+            var lastName = $("#txt-lastname").val();
+
+            var mydata = new Object();
+            mydata.firstname = firstName;
+            mydata.lastname = lastName;
+            /*
+             {
+                firstname: firstName,
+                lastname: lastName
+             }
+             */
+
+            //$.get("/Home/GetUserName", mydata, function (value) {
+            //    // data - отправляемые на сервер данные
+            //    // value - принимаемые данные с сервера
+            //    console.log(value);
+            //});
+
+            $.ajax({
+                type: "GET",
+                url: "/Home/GetUserName",
+                contentType: "application/json; charset=utf-8", // отправляем тип данных
+                data: mydata, // данные отправляемые на сервер
+                success: function (value) {
+                    // функция callback, выполняемая при успешном запросе
+                    // value - данные с сервера при успешном запросе
+                    alert(value);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+        });
+
+        $("#btn-randomnumber").on("click", function () {
+            $.get("/Home/GenerateRandomNumber", null, function (number) {
+                $("#rnd-text").css("display", "block");
+                $("#rnd-text").html(number);
+            });
+
+        });
+
+        $("#btn-student").on("click", function () {
+            var studentData = $("#frm-student").serialize();
+            
+            $.post("/Home/AddStudent", studentData, function (value) {
+                //alert(value);
+            });
+
+            $.get("/Home/GetStudents", null, function (students) {
+                // вывести в таблицу
+                console.log(students);
+                for (var i in students) {
+                    $("#studentsDiv").append("<h4>" + students[i].Name + "</h4>");
+                    $("#studentsDiv").append("<p>" + students[i].Mark + "</p>");
+                }
+            });
+        });
+
+    </script>
+}
